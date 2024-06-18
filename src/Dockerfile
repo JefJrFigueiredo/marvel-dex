@@ -3,7 +3,6 @@ WORKDIR /build
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o app
 
-
 FROM alpine:3.19 as final
 RUN adduser --uid 1000 --disabled-password appuser
 USER appuser

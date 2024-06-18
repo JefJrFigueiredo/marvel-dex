@@ -3,6 +3,7 @@ name: CI-CD
 env:
   DOCKER_IMAGE_NAME: ${{ secrets.REGISTRY_USERNAME }}/marvel-dex-live
   VERSION_PREFIX: v0.0
+  CLOUD_RUN_SERVICE_NAME: live-go-jefjrfig
 
 on:
   push:
@@ -30,3 +31,14 @@ jobs:
           tags: |
             ${{ env.DOCKER_IMAGE_NAME }}:${{ env.VERSION_PREFIX }}.${{ github.run_number }}
             ${{ env.DOCKER_IMAGE_NAME }}:latest
+
+  CD:
+    runs-on: ubuntu-latest
+    needs: [CI]
+    steps:
+      - name: "Deploy on Azure App Service"
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: '${{ env.CLOUD_RUN_SERVICE_NAME }}'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          images: '${{ env.DOCKER_IMAGE_NAME }}:${{ env.VERSION_PREFIX }}.${{ github.run_number }}'
